@@ -364,25 +364,443 @@ tr:hover td{background:#FDFCFC;}
 .pdimg img{width:100%;height:100%;object-fit:cover;}
 @media(max-width:768px){.statrow{grid-template-columns:1fr 1fr;}.sastatrow{grid-template-columns:1fr 1fr;}.chartrow{grid-template-columns:1fr;}.cats-grid{grid-template-columns:repeat(3,1fr);}.sf-hero{grid-template-columns:1fr;}.sf-hero-img{display:none;}.sf-nav-links{display:none;}}
 @media(max-width:640px){.dsidebar{transform:translateX(-100%);}.dsidebar.mob{transform:translateX(0);}.dmain{margin-left:0;}.sasb{transform:translateX(-100%);}.sasb.mob{transform:translateX(0);}.samain{margin-left:0;}.statrow{grid-template-columns:1fr 1fr;}.prods-grid{grid-template-columns:1fr 1fr;}.cats-grid{grid-template-columns:repeat(2,1fr);}}
+
+/* BOTTOM NAVIGATION */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #F3E8EE;display:none;justify-content:space-around;padding:8px 0 12px;z-index:100;}
+.bottom-nav.show{display:flex;}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 12px;border-radius:10px;transition:all .15s;}
+.bn-item:hover{background:#FFF0F5;}
+.bn-item.active .bn-ico{color:#C4507A;}
+.bn-item.active .bn-label{color:#C4507A;font-weight:600;}
+.bn-ico{font-size:1.3rem;}
+.bn-label{font-size:.65rem;color:#6B7280;font-family:'Times New Roman',Times,serif;}
+
+/* PRODUCT RATING */
+.pcard-rating{display:flex;align-items:center;gap:3px;margin-bottom:6px;}
+.pcard-rating span{font-size:.7rem;color:#F59E0B;}
+.pcard-reviews{font-size:.68rem;color:#6B7280;margin-left:4px;font-family:'Times New Roman',Times,serif;}
+
+/* SALE BANNER */
+.sale-banner{background:linear-gradient(135deg,#FDF0F5,#F9E4EC);border-radius:16px;padding:24px 32px;margin:20px 0;display:flex;align-items:center;justify-content:space-between;overflow:hidden;position:relative;}
+.sale-banner::before{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;background:rgba(196,80,122,.08);border-radius:50%;}
+.sale-text h3{font-family:'Times New Roman',Times,serif;font-size:1.4rem;font-weight:700;color:#1A1A2E;margin-bottom:4px;}
+.sale-text p{font-family:'Times New Roman',Times,serif;font-size:.85rem;color:#6B7280;}
+.sale-badge{background:#C4507A;color:#fff;padding:10px 24px;border-radius:8px;font-family:'Times New Roman',Times,serif;font-size:.85rem;font-weight:600;cursor:pointer;border:none;}
+
+/* NEW ARRIVALS SECTION */
+.new-arrivals{margin-top:30px;}
+.new-badge{background:#10B981;color:#fff;padding:3px 10px;border-radius:100px;font-size:.65rem;font-weight:600;font-family:'Times New Roman',Times,serif;position:absolute;top:8px;left:8px;}
+
+/* IMPROVED HERO */
+.sf-hero{background:linear-gradient(135deg,#FDF0F5 0%,#F9E4EC 50%,#FDF6F8 100%);position:relative;overflow:hidden;}
+.sf-hero::before{content:'';position:absolute;right:-50px;top:-50px;width:300px;height:300px;background:rgba(196,80,122,.05);border-radius:50%;}
+.sf-hero::after{content:'';position:absolute;left:-30px;bottom:-30px;width:200px;height:200px;background:rgba(212,168,83,.05);border-radius:50%;}
+
+/* SMOOTHER ANIMATIONS */
+.pcard{transition:transform .25s cubic-bezier(.4,0,.2,1),box-shadow .25s cubic-bezier(.4,0,.2,1);}
+.pcard:hover{transform:translateY(-6px) scale(1.01);box-shadow:0 20px 40px rgba(0,0,0,.1);}
+.cat-card{transition:transform .25s cubic-bezier(.4,0,.2,1),box-shadow .2s;}
+.cat-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.08);}
+
+/* IMPROVED BUTTONS */
+.bgold{transition:all .2s;box-shadow:0 4px 16px rgba(212,168,83,.3);}
+.bgold:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,168,83,.4);}
+.sf-shop-now{transition:all .2s;}
+.sf-shop-now:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,26,46,.2);}
+.pcard-add{transition:all .15s;}
+.pcard-add:hover{transform:scale(1.05);}
+
+/* SHOW BOTTOM NAV ON MOBILE */
+@media(max-width:768px){
+  .bottom-nav{display:flex !important;}
+  .sf-nav-links{display:none !important;}
+  .sf-hero{padding:40px 20px;min-height:auto;}
+  .sf-hero-img{height:200px;}
+}
+
 </style>
 </head>
 <body>
 <svg style="display:none"><symbol id="dico" viewBox="0 0 512 512"><defs><linearGradient id="dg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1A0A12"/><stop offset="100%" style="stop-color:#2D1520"/></linearGradient><linearGradient id="dg2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#FFF0A0"/><stop offset="50%" style="stop-color:#D4A853"/><stop offset="100%" style="stop-color:#8B6914"/></linearGradient></defs><circle cx="256" cy="256" r="256" fill="url(#dg1)"/><circle cx="256" cy="256" r="242" fill="none" stroke="url(#dg2)" stroke-width="4"/><rect x="130" y="210" width="252" height="48" rx="6" fill="url(#dg2)"/><polygon points="130,212 152,110 174,212" fill="url(#dg2)"/><polygon points="186,212 214,130 242,212" fill="url(#dg2)"/><polygon points="222,212 256,90 290,212" fill="url(#dg2)"/><polygon points="270,212 298,130 326,212" fill="url(#dg2)"/><polygon points="338,212 360,110 382,212" fill="url(#dg2)"/><circle cx="152" cy="106" r="12" fill="#C0392B" stroke="#F5D27A" stroke-width="2"/><circle cx="214" cy="126" r="12" fill="#27AE60" stroke="#F5D27A" stroke-width="2"/><circle cx="256" cy="82" r="14" fill="#2980B9" stroke="#F5D27A" stroke-width="2.5"/><circle cx="298" cy="126" r="12" fill="#27AE60" stroke="#F5D27A" stroke-width="2"/><circle cx="360" cy="106" r="12" fill="#C0392B" stroke="#F5D27A" stroke-width="2"/><text x="256" y="378" font-family="Georgia,serif" font-size="175" font-weight="bold" font-style="italic" text-anchor="middle" fill="url(#dg2)">D</text></symbol></svg>
 
-<!-- LANDING -->
+<!-- LANDING / HOMEPAGE -->
 <div class="view active" id="landing">
-  <div class="lbox">
-    <svg class="lico" viewBox="0 0 512 512"><use href="#dico"/></svg>
-    <div class="ltitle">Doughty</div>
-    <div class="lsub">Beauty & Cosmetics Platform</div>
-    <div class="lbtns">
-      <button class="bgold" onclick="show('custOv')">Shop Now</button>
-      <button class="bghost" onclick="show('loginOv')">Shop Owner Login</button>
-      <button class="bghost" onclick="show('signupOv')">Register My Store</button>
-      <button class="badm" onclick="show('saOv')">Admin Access</button>
+  <!-- TOP BAR -->
+  <div class="hp-topbar">
+    <div class="hp-topbar-left">
+      <span>&#128666; Free delivery on orders over KSh 3,000</span>
+      <span class="hp-divider">|</span>
+      <span>&#9989; 100% Original Products</span>
     </div>
-    <div class="lfoot">&copy; 2026 Doughty Platform &middot; Powering beauty businesses</div>
+    <div class="hp-topbar-right">
+      <span onclick="show('trackOv')">&#128269; Track Order</span>
+      <span onclick="show('helpOv')">&#128172; Help</span>
+    </div>
   </div>
+
+  <!-- NAVIGATION -->
+  <nav class="hp-nav">
+    <div class="hp-brand">
+      <svg class="hp-blogo" viewBox="0 0 512 512"><use href="#dico"/></svg>
+      <div>
+        <div class="hp-bname">Doughty</div>
+        <div class="hp-bsub">BEAUTY & COSMETICS</div>
+      </div>
+    </div>
+    <div class="hp-nav-links">
+      <a class="hp-nav-link active" href="#" onclick="return false;">HOME</a>
+      <a class="hp-nav-link" onclick="show('custOv')">SHOP</a>
+      <a class="hp-nav-link" onclick="show('custOv')">BRANDS</a>
+      <a class="hp-nav-link" onclick="show('custOv')">SKINCARE</a>
+      <a class="hp-nav-link" onclick="show('custOv')">MAKEUP</a>
+      <a class="hp-nav-link" onclick="show('custOv')">HAIRCARE</a>
+      <a class="hp-nav-link hp-sale" onclick="show('custOv')">SALE</a>
+      <a class="hp-nav-link" onclick="show('custOv')">NEW IN</a>
+    </div>
+    <div class="hp-nav-icons">
+      <span onclick="show('custOv')">&#128269;</span>
+      <span onclick="show('loginOv')">&#128100;</span>
+      <span onclick="show('custOv')">&#129293;<b>0</b></span>
+      <span onclick="show('custOv')">&#128722;<b>0</b></span>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <div class="hp-hero">
+    <div class="hp-hero-bg"></div>
+    <div class="hp-hero-content">
+      <div class="hp-hero-badge">&#127775; NEW COLLECTION</div>
+      <h1 class="hp-hero-title">Enhance Your<br/><span class="hp-hero-accent">Natural Beauty</span></h1>
+      <p class="hp-hero-desc">Discover premium cosmetics and skincare for radiant, confident you. Authentic products from trusted Kenyan beauty stores.</p>
+      <button class="hp-hero-btn" onclick="show('custOv')">SHOP NOW &rarr;</button>
+    </div>
+    <div class="hp-hero-image">
+      <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=500&fit=crop" alt="Beauty model with products" onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\'hp-hero-fallback\'>&#128132; Beauty Essentials</div>'"/>
+    </div>
+  </div>
+
+  <!-- TRUST BAR -->
+  <div class="hp-trust">
+    <div class="hp-trust-item">
+      <div class="hp-trust-icon">&#128666;</div>
+      <div><strong>FAST DELIVERY</strong><span>Nationwide delivery</span></div>
+    </div>
+    <div class="hp-trust-item">
+      <div class="hp-trust-icon">&#9989;</div>
+      <div><strong>100% ORIGINAL</strong><span>Authentic products only</span></div>
+    </div>
+    <div class="hp-trust-item">
+      <div class="hp-trust-icon">&#128172;</div>
+      <div><strong>24/7 SUPPORT</strong><span>We are here to help</span></div>
+    </div>
+    <div class="hp-trust-item">
+      <div class="hp-trust-icon">&#8617;&#65039;</div>
+      <div><strong>EASY RETURNS</strong><span>Hassle-free returns</span></div>
+    </div>
+  </div>
+
+  <!-- CATEGORIES SECTION -->
+  <div class="hp-section">
+    <div class="hp-sec-header">
+      <h2>Browse Categories</h2>
+      <a onclick="show('custOv')">View all &rarr;</a>
+    </div>
+    <div class="hp-cats">
+      <div class="hp-cat-sidebar">
+        <div class="hp-cat-title">&#9776; BROWSE CATEGORIES</div>
+        <div class="hp-cat-list">
+          <div class="hp-cat-item" onclick="show('custOv')"><span>&#128132;</span> Skincare <span class="hp-cat-arrow">&rarr;</span></div>
+          <div class="hp-cat-item" onclick="show('custOv')"><span>&#128141;</span> Makeup <span class="hp-cat-arrow">&rarr;</span></div>
+          <div class="hp-cat-item" onclick="show('custOv')"><span>&#128135;</span> Haircare <span class="hp-cat-arrow">&rarr;</span></div>
+          <div class="hp-cat-item" onclick="show('custOv')"><span>&#128171;</span> Fragrances <span class="hp-cat-arrow">&rarr;</span></div>
+          <div class="hp-cat-item" onclick="show('custOv')"><span>&#128295;</span> Tools & Accessories <span class="hp-cat-arrow">&rarr;</span></div>
+        </div>
+      </div>
+      <div class="hp-cat-cards">
+        <div class="hp-cat-card" onclick="show('custOv')">
+          <img src="https://images.unsplash.com/photo-1556228578-0d85b1a4d7e5?w=300&h=250&fit=crop" alt="Skincare" onerror="this.parentElement.querySelector('.hp-cat-fallback').style.display='flex'"/>
+          <div class="hp-cat-fallback" style="display:none">&#127800; Skincare</div>
+          <div class="hp-cat-info">
+            <h3>SKINCARE</h3>
+            <a>Shop Now &rarr;</a>
+          </div>
+        </div>
+        <div class="hp-cat-card" onclick="show('custOv')">
+          <img src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300&h=250&fit=crop" alt="Makeup" onerror="this.parentElement.querySelector('.hp-cat-fallback').style.display='flex'"/>
+          <div class="hp-cat-fallback" style="display:none">&#128132; Makeup</div>
+          <div class="hp-cat-info">
+            <h3>MAKEUP</h3>
+            <a>Shop Now &rarr;</a>
+          </div>
+        </div>
+        <div class="hp-cat-card" onclick="show('custOv')">
+          <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300&h=250&fit=crop" alt="Haircare" onerror="this.parentElement.querySelector('.hp-cat-fallback').style.display='flex'"/>
+          <div class="hp-cat-fallback" style="display:none">&#128135; Haircare</div>
+          <div class="hp-cat-info">
+            <h3>HAIRCARE</h3>
+            <a>Shop Now &rarr;</a>
+          </div>
+        </div>
+        <div class="hp-cat-card" onclick="show('custOv')">
+          <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=300&h=250&fit=crop" alt="Fragrances" onerror="this.parentElement.querySelector('.hp-cat-fallback').style.display='flex'"/>
+          <div class="hp-cat-fallback" style="display:none">&#128171; Fragrances</div>
+          <div class="hp-cat-info">
+            <h3>FRAGRANCES</h3>
+            <a>Shop Now &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BEST SELLERS -->
+  <div class="hp-section hp-gray">
+    <div class="hp-sec-header">
+      <h2>Best Sellers</h2>
+      <a onclick="show('custOv')">View all &rarr;</a>
+    </div>
+    <div class="hp-products">
+      <div class="hp-product" onclick="show('custOv')">
+        <div class="hp-prod-img">
+          <img src="https://images.unsplash.com/photo-1631729371254-2c4970c5e8f5?w=200&h=200&fit=crop" alt="Foundation" onerror="this.style.display='none';this.parentElement.querySelector('.hp-prod-fb').style.display='flex'"/>
+          <div class="hp-prod-fb" style="display:none">&#128132;</div>
+          <span class="hp-prod-badge">Bestseller</span>
+        </div>
+        <div class="hp-prod-info">
+          <div class="hp-prod-stars">&#11088;&#11088;&#11088;&#11088;&#11088; <span>(128)</span></div>
+          <div class="hp-prod-name">Fit Me Matte Foundation</div>
+          <div class="hp-prod-price">KSh 1,450</div>
+        </div>
+      </div>
+      <div class="hp-product" onclick="show('custOv')">
+        <div class="hp-prod-img">
+          <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=200&h=200&fit=crop" alt="Serum" onerror="this.style.display='none';this.parentElement.querySelector('.hp-prod-fb').style.display='flex'"/>
+          <div class="hp-prod-fb" style="display:none">&#127807;</div>
+        </div>
+        <div class="hp-prod-info">
+          <div class="hp-prod-stars">&#11088;&#11088;&#11088;&#11088;&#11088; <span>(96)</span></div>
+          <div class="hp-prod-name">The Ordinary Niacinamide 10%</div>
+          <div class="hp-prod-price">KSh 1,200</div>
+        </div>
+      </div>
+      <div class="hp-product" onclick="show('custOv')">
+        <div class="hp-prod-img">
+          <img src="https://images.unsplash.com/photo-1586495777744-60f28f3c1c8c?w=200&h=200&fit=crop" alt="Lipstick" onerror="this.style.display='none';this.parentElement.querySelector('.hp-prod-fb').style.display='flex'"/>
+          <div class="hp-prod-fb" style="display:none">&#128139;</div>
+        </div>
+        <div class="hp-prod-info">
+          <div class="hp-prod-stars">&#11088;&#11088;&#11088;&#11088;&#9734; <span>(87)</span></div>
+          <div class="hp-prod-name">Maybelline Superstay Matte Ink</div>
+          <div class="hp-prod-price">KSh 1,150</div>
+        </div>
+      </div>
+      <div class="hp-product" onclick="show('custOv')">
+        <div class="hp-prod-img">
+          <img src="https://images.unsplash.com/photo-1556228720-195a672c5c2d?w=200&h=200&fit=crop" alt="Moisturizer" onerror="this.style.display='none';this.parentElement.querySelector('.hp-prod-fb').style.display='flex'"/>
+          <div class="hp-prod-fb" style="display:none">&#128524;</div>
+          <span class="hp-prod-badge hp-new">NEW</span>
+        </div>
+        <div class="hp-prod-info">
+          <div class="hp-prod-stars">&#11088;&#11088;&#11088;&#11088;&#11088; <span>(42)</span></div>
+          <div class="hp-prod-name">Neutrogena Hydro Boost Gel</div>
+          <div class="hp-prod-price">KSh 1,850</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW ARRIVALS -->
+  <div class="hp-section">
+    <div class="hp-sec-header">
+      <h2>New Arrivals</h2>
+      <a onclick="show('custOv')">View all &rarr;</a>
+    </div>
+    <div class="hp-products">
+      <div class="hp-product" onclick="show('custOv')">
+        <div class="hp-prod-img">
+          <img src="https://images.unsplash.com/photo-1599305090598-fe179d501227?w=200&h=200&fit=crop" alt="Eyeshadow" onerror="this.style.display='none';this.parentElement.querySelector('.hp-prod-fb').style.display='flex'"/>
+          <div class="hp-prod-fb" style="display:none">&#127912;</div>
+          <span class="hp-prod-badge hp-new">NEW</span>
+        </div>
+        <div class="hp-prod-info">
+          <div class="hp-prod-name">Nudes Eyeshadow Palette</div>
+          <div class="hp-prod-price">KSh 2,100</div>
+        </div>
+      </div>
+      <div class="hp-product" onclick="show('custOv')">
+        <div class="hp-prod-img">
+          <img src="https://images.unsplash.com/photo-1608248543803-ba4f7c70addc?w=200&h=200&fit=crop" alt="Face Serum" onerror="this.style.display='none';this.parentElement.querySelector('.hp-prod-fb').style.display='flex'"/>
+          <div class="hp-prod-fb" style="display:none">&#127807;</div>
+          <span class="hp-prod-badge hp-new">NEW</span>
+        </div>
+        <div class="hp-prod-info">
+          <div class="hp-prod-name">Vitamin C Brightening Serum</div>
+          <div class="hp-prod-price">KSh 1,800</div>
+        </div>
+      </div>
+      <div class="hp-product" onclick="show('custOv')">
+        <div class="hp-prod-img">
+          <img src="https://images.unsplash.com/photo-1522335789203-aabd1f830145?w=200&h=200&fit=crop" alt="Lip Gloss" onerror="this.style.display='none';this.parentElement.querySelector('.hp-prod-fb').style.display='flex'"/>
+          <div class="hp-prod-fb" style="display:none">&#128139;</div>
+          <span class="hp-prod-badge hp-new">NEW</span>
+        </div>
+        <div class="hp-prod-info">
+          <div class="hp-prod-name">Lip Gloss Set - 3 Shades</div>
+          <div class="hp-prod-price">KSh 950</div>
+        </div>
+      </div>
+      <div class="hp-product" onclick="show('custOv')">
+        <div class="hp-prod-img">
+          <img src="https://images.unsplash.com/photo-1594035910387-fea47794261f?w=200&h=200&fit=crop" alt="Hair Mask" onerror="this.style.display='none';this.parentElement.querySelector('.hp-prod-fb').style.display='flex'"/>
+          <div class="hp-prod-fb" style="display:none">&#128135;</div>
+          <span class="hp-prod-badge hp-new">NEW</span>
+        </div>
+        <div class="hp-prod-info">
+          <div class="hp-prod-name">Olaplex Hair Repair Mask</div>
+          <div class="hp-prod-price">KSh 2,400</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURED STORES -->
+  <div class="hp-section hp-gray">
+    <div class="hp-sec-header">
+      <h2>Featured Stores</h2>
+      <a onclick="show('custOv')">View all &rarr;</a>
+    </div>
+    <div class="hp-stores">
+      <div class="hp-store" onclick="show('custOv')">
+        <div class="hp-store-av">B</div>
+        <div class="hp-store-info">
+          <strong>Bella Beauty</strong>
+          <span>Skincare & Makeup</span>
+          <div class="hp-store-meta">&#11088; 4.9 · 234 orders</div>
+        </div>
+      </div>
+      <div class="hp-store" onclick="show('custOv')">
+        <div class="hp-store-av" style="background:#8B2D52;">G</div>
+        <div class="hp-store-info">
+          <strong>Glow Up Cosmetics</strong>
+          <span>Organic & Natural</span>
+          <div class="hp-store-meta">&#11088; 4.7 · 189 orders</div>
+        </div>
+      </div>
+      <div class="hp-store" onclick="show('custOv')">
+        <div class="hp-store-av" style="background:#D4A853;">L</div>
+        <div class="hp-store-info">
+          <strong>Luxe Skin</strong>
+          <span>Premium Skincare</span>
+          <div class="hp-store-meta">&#11088; 4.8 · 156 orders</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <div class="hp-section">
+    <div class="hp-sec-header">
+      <h2>What Our Customers Say</h2>
+    </div>
+    <div class="hp-reviews">
+      <div class="hp-review">
+        <div class="hp-review-stars">&#11088;&#11088;&#11088;&#11088;&#11088;</div>
+        <p>"Amazing products and fast delivery! The foundation is perfect for my skin tone. Will definitely shop again!"</p>
+        <div class="hp-review-author">
+          <div class="hp-review-av">S</div>
+          <div><strong>Sarah W.</strong><span>Verified Buyer</span></div>
+        </div>
+      </div>
+      <div class="hp-review">
+        <div class="hp-review-stars">&#11088;&#11088;&#11088;&#11088;&#11088;</div>
+        <p>"Love that I can pay with M-Pesa and get my order via WhatsApp. So convenient for us in Nairobi!"</p>
+        <div class="hp-review-author">
+          <div class="hp-review-av" style="background:#8B2D52;">M</div>
+          <div><strong>Mary K.</strong><span>Verified Buyer</span></div>
+        </div>
+      </div>
+      <div class="hp-review">
+        <div class="hp-review-stars">&#11088;&#11088;&#11088;&#11088;&#9734;</div>
+        <p>"Great selection of authentic products. The store owner was very helpful with recommendations."</p>
+        <div class="hp-review-author">
+          <div class="hp-review-av" style="background:#D4A853;">A</div>
+          <div><strong>Alice N.</strong><span>Verified Buyer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEWSLETTER -->
+  <div class="hp-newsletter">
+    <div class="hp-news-content">
+      <h2>Join the Doughty Family</h2>
+      <p>Get exclusive deals, new arrivals, and beauty tips delivered to your WhatsApp.</p>
+      <div class="hp-news-form">
+        <input type="text" placeholder="Enter your WhatsApp number"/>
+        <button onclick="toast('Subscribed! Check your WhatsApp.')">Subscribe</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="hp-footer">
+    <div class="hp-footer-grid">
+      <div>
+        <div class="hp-footer-brand">
+          <svg width="28" height="28" viewBox="0 0 512 512"><use href="#dico"/></svg>
+          <span>Doughty</span>
+        </div>
+        <p style="font-size:.8rem;color:#9CA3AF;line-height:1.6;margin-top:8px;">Kenya's premier beauty marketplace. Connecting you with authentic cosmetics from trusted local stores.</p>
+      </div>
+      <div>
+        <h4>Shop</h4>
+        <a onclick="show('custOv')">Skincare</a>
+        <a onclick="show('custOv')">Makeup</a>
+        <a onclick="show('custOv')">Haircare</a>
+        <a onclick="show('custOv')">Fragrances</a>
+      </div>
+      <div>
+        <h4>Sell</h4>
+        <a onclick="show('signupOv')">Open a Store</a>
+        <a onclick="show('loginOv')">Seller Login</a>
+        <a onclick="show('loginOv')">Seller Dashboard</a>
+      </div>
+      <div>
+        <h4>Support</h4>
+        <a onclick="show('helpOv')">Help Center</a>
+        <a onclick="show('trackOv')">Track Order</a>
+        <a onclick="show('helpOv')">Contact Us</a>
+      </div>
+    </div>
+    <div class="hp-footer-bottom">
+      <span>&copy; 2026 Doughty Platform. All rights reserved.</span>
+      <span>Made with &#10084; in Kenya</span>
+    </div>
+  </footer>
+
+  <!-- BOTTOM NAV (Mobile) -->
+  <nav class="hp-bottom-nav">
+    <div class="hp-bn-item active" onclick="window.scrollTo(0,0)">
+      <span>&#127968;</span>
+      <div>Home</div>
+    </div>
+    <div class="hp-bn-item" onclick="show('custOv')">
+      <span>&#128722;</span>
+      <div>Shop</div>
+    </div>
+    <div class="hp-bn-item" onclick="show('custOv')">
+      <span>&#128194;</span>
+      <div>Categories</div>
+    </div>
+    <div class="hp-bn-item" onclick="show('custOv')">
+      <span>&#129293;</span>
+      <div>Wishlist</div>
+    </div>
+    <div class="hp-bn-item" onclick="show('loginOv')">
+      <span>&#128100;</span>
+      <div>Account</div>
+    </div>
+  </nav>
 </div>
 
 <!-- LOCK -->
@@ -419,8 +837,8 @@ tr:hover td{background:#FDFCFC;}
   </nav>
   <div class="sf-hero">
     <div class="sf-hero-text">
-      <h1 id="sfHT">Enhance Your<br/>Natural Beauty</h1>
-      <p id="sfHP">Discover premium skincare and makeup essentials, crafted for radiance.</p>
+      <h1 id="sfHT">Reveal Your<br/><span style="font-style:italic;">Natural Beauty</span></h1>
+      <p id="sfHP">Premium cosmetics and skincare for a more confident you. Discover products crafted for radiance.</p>
       <button class="sf-shop-now" onclick="document.querySelector('.sf-body').scrollIntoView({behavior:'smooth'})">SHOP NOW</button>
     </div>
     <div class="sf-hero-img" id="sfHeroImg">
@@ -434,12 +852,46 @@ tr:hover td{background:#FDFCFC;}
     <div class="sf-ti">&#8617;&#65039;<div><strong>Easy Returns</strong>Hassle free returns</div></div>
   </div>
   <div class="sf-body">
+    <!-- SALE BANNER -->
+    <div class="sale-banner" style="margin-bottom:30px;">
+      <div class="sale-text">
+        <h3>UP TO 50% OFF</h3>
+        <p>On selected beauty essentials this week only!</p>
+      </div>
+      <button class="sale-badge" onclick="filterSF('all',null)">SHOP SALE</button>
+    </div>
+
     <div class="sf-sec-hdr"><h2>Shop By Category</h2><span class="sf-view-all">View all</span></div>
     <div class="cats-grid" id="sfCats"></div>
     <div class="sf-sec-hdr"><h2>Best Sellers</h2><span class="sf-view-all">View all</span></div>
     <div class="sf-filters" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px;" id="sfFilters"></div>
     <div class="prods-grid" id="sfGrid"></div>
   </div>
+
+  <!-- BOTTOM NAVIGATION (Mobile) -->
+  <nav class="bottom-nav" id="bottomNav">
+    <div class="bn-item active" onclick="bnNav('home')">
+      <div class="bn-ico">&#127968;</div>
+      <div class="bn-label">Home</div>
+    </div>
+    <div class="bn-item" onclick="bnNav('shop')">
+      <div class="bn-ico">&#128722;</div>
+      <div class="bn-label">Shop</div>
+    </div>
+    <div class="bn-item" onclick="bnNav('categories')">
+      <div class="bn-ico">&#128194;</div>
+      <div class="bn-label">Categories</div>
+    </div>
+    <div class="bn-item" onclick="bnNav('wishlist')">
+      <div class="bn-ico">&#129293;</div>
+      <div class="bn-label">Wishlist</div>
+    </div>
+    <div class="bn-item" onclick="bnNav('account')">
+      <div class="bn-ico">&#128100;</div>
+      <div class="bn-label">Account</div>
+    </div>
+  </nav>
+
   <div class="cbwrap">
     <div class="cwin" id="cwin">
       <div class="chdr"><div class="cav">&#128132;</div><div><strong style="font-size:.82rem;">Doughty AI</strong><br/><span style="font-size:.68rem;opacity:.85;">Online &middot; Ready to help</span></div></div>
@@ -689,7 +1141,7 @@ const sb = {
 
 let owner=null, storeId=null, basket=[], lang='en', selR=0, chatOpen=false, delCh='yes';
 let currentStore=null;
-const SA={u:'doughty_ admin',p:'@Mike254#D'}, AWA='0732916813';
+const SA={u:'doughty_admin',p:'@Mike254#D'}, AWA='0732916813';
 
 // -- VIEWS --
 function showView(id){
@@ -770,10 +1222,17 @@ async function ownerLogin(){
 
 // -- SA LOGIN --
 function saLogin(){
-  const u=document.getElementById('sau').value.trim(),p=document.getElementById('sap').value;
+  const u=document.getElementById('sau').value.trim();
+  const p=document.getElementById('sap').value;
   const err=document.getElementById('saerr');
-  if(u===SA.u&&p===SA.p){err.style.display='none';hide('saOv');loadSA();showView('superAdmin');}
-  else{err.style.display='block';}
+  if(u===SA.u && p===SA.p){
+    err.style.display='none';
+    hide('saOv');
+    showView('superAdmin');
+    setTimeout(()=>{ if(typeof loadSA==='function') loadSA(); }, 100);
+  } else {
+    err.style.display='block';
+  }
 }
 
 // -- CUSTOMER ENTER --
@@ -876,6 +1335,7 @@ function renderSFP(prods,cat){
       <div class="pcard-body">
         <div class="pcard-cat">${p.category||''}</div>
         <div class="pcard-name">${p.name}</div>
+        <div class="pcard-rating">${'&#11088;'.repeat(Math.floor(Math.random()*2)+3)}<span class="pcard-reviews">(${Math.floor(Math.random()*100)+20})</span></div>
         <div class="pcard-foot">
           <span class="pcard-price">KSh ${Number(p.price).toLocaleString()}</span>
           <button class="pcard-add" onclick="event.stopPropagation();addB('${p.id}')">Add</button>
@@ -1034,6 +1494,17 @@ async function sendChat(){
 }
 
 function toggleLang(){lang=lang==='en'?'sw':'en';document.getElementById('langL').textContent=lang==='en'?'SW':'EN';toast(lang==='sw'?'Lugha: Kiswahili &#127472;&#127466;':'Language: English');}
+
+
+function bnNav(tab){
+  document.querySelectorAll('.bn-item').forEach(i=>i.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  if(tab==='home'){window.scrollTo({top:0,behavior:'smooth'});}
+  else if(tab==='shop'){document.querySelector('.sf-body').scrollIntoView({behavior:'smooth'});}
+  else if(tab==='categories'){document.getElementById('sfCats').scrollIntoView({behavior:'smooth'});}
+  else if(tab==='wishlist'){toast('Wishlist coming soon!');}
+  else if(tab==='account'){toast('Please login as shop owner');}
+}
 
 // -- DASHBOARD --
 async function loadDash(){
@@ -1603,4 +2074,3 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.se
 </script>
 </body>
 </html>
-
