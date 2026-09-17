@@ -1322,38 +1322,19 @@ async function placeOrder(){
   if(!n||!ph){toast('Please fill your name and phone number.');return;}
   loading(true);
   try{
-    // Reserve stock atomically for every trackable item BEFORE creating the order.
-    // This prevents two customers buying the last unit of the same item at the same time.
-    const reserved=[];
-    const failures=[];
-    for(const i of basket){
-      if(i.stock==null || isNaN(Number(i.stock))) continue; // untracked stock — no check possible, allow through
-      const fresh=await sb.get('products', `id=eq.${i.id}&select=stock`);
-      const liveStock=fresh.length?Number(fresh[0].stock):0;
-      if(liveStock < i.qty){
-        failures.push(`${i.name} — only ${liveStock} left`);
-        continue;
+    // Reserve tracked stock in one server-side transaction before creating the order.
+    // The RPC enforces the active-store check and rolls back every item if any item is unavailable.
+    const trackedItems=basket
+      .filter(i=>i.stock!=null && !isNaN(Number(i.stock)))
+      .map(i=>({id:i.id,qty:Number(i.qty)}));
+    if(trackedItems.length){
+      try{
+        await sb.rpc('reserve_product_stock',{p_items:trackedItems});
+      }catch(e){
+        toast('⚠️ One or more items are out of stock. Please review your bag and try again.');
+        loading(false);
+        return;
       }
-      // Atomic: this UPDATE only succeeds if stock is still exactly liveStock at write time.
-      // If another checkout changed it in between, this returns 0 rows and we know we lost the race.
-      const result=await sb.patch('products', `id=eq.${i.id}&stock=eq.${liveStock}`, {stock: liveStock - i.qty});
-      if(!result.length){
-        failures.push(`${i.name} — just sold out, please try again`);
-      }else{
-        reserved.push({id:i.id, qty:i.qty}); // track what we've reserved in case we need to roll back
-      }
-    }
-    if(failures.length){
-      // Roll back anything we successfully reserved before hitting a failure, so nothing is silently held
-      for(const r of reserved){
-        try{
-          const cur=await sb.get('products', `id=eq.${r.id}&select=stock`);
-          if(cur.length) await sb.patch('products', `id=eq.${r.id}`, {stock: Number(cur[0].stock)+r.qty});
-        }catch(e){}
-      }
-      toast('⚠️ Stock changed before checkout finished: '+failures.join('; ')+'. Please review your bag.');
-      loading(false);
-      return;
     }
     const tot=basket.reduce((a,i)=>a+i.price*i.qty,0);
     const orderId='ORD-'+Date.now();
