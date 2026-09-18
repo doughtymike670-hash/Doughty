@@ -37,6 +37,9 @@ module.exports = async (req, res) => {
   const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const ENC_KEY = process.env.ENCRYPTION_KEY;
 
+  if (!/^[0-9]{5,7}$/.test(shortcode)) return res.status(400).json({ error: 'Shortcode must be 5 to 7 digits.' });
+  if (!/^[0-9a-f]{64}$/i.test(ENC_KEY || '')) return res.status(500).json({ error: 'Payment encryption is not configured correctly.' });
+
   try {
     // 1. Verify the caller is a real logged-in user (not a forged request)
     const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
