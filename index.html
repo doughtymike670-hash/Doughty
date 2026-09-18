@@ -1339,7 +1339,7 @@ async function placeOrder(){
     });
 
     if(selectedPM==='mpesa_stk'){
-      basket=[];updBasket();hide('ckOv');
+      hide('ckOv');
       await startMpesaWait(orderId, ph);
       loading(false);
       return;
@@ -1375,11 +1375,13 @@ async function startMpesaWait(orderId, phone){
     });
     const d=await r.json();
     if(!r.ok||!d.success){
-      mpesaWaitResult(false, d.error||'Could not start the M-Pesa prompt. Please try again.');
+      await sb.rpc('cancel_order',{p_order_id:orderId,p_phone:phone}).catch(()=>{});
+      mpesaWaitResult(false, d.error||'Could not start the M-Pesa prompt. Your stock has been released; please try again.');
       return;
     }
   }catch(e){
-    mpesaWaitResult(false, 'Connection error starting payment. Please try again.');
+    await sb.rpc('cancel_order',{p_order_id:orderId,p_phone:phone}).catch(()=>{});
+    mpesaWaitResult(false, 'Connection error starting payment. Your stock has been released; please try again.');
     return;
   }
 
@@ -1391,7 +1393,7 @@ async function startMpesaWait(orderId, phone){
       return;
     }
     try{
-      const rows=await sb.rpc('get_order_status',{p_order_id:orderId});
+      const rows=await sb.rpc('get_order_status',{p_order_id:orderId,p_phone:phone});
       const row=(rows&&rows[0])||{};
       if(row.order_status==='paid'){
         clearInterval(poll);
