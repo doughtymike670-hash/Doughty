@@ -1322,47 +1322,45 @@ async function placeOrder(){
   if(!n||!ph){toast('Please fill your name and phone number.');return;}
   loading(true);
   try{
-    // Reserve tracked stock in one server-side transaction before creating the order.
-    // The RPC enforces the active-store check and rolls back every item if any item is unavailable.
-    const trackedItems=basket
-      .filter(i=>i.stock!=null && !isNaN(Number(i.stock)))
-      .map(i=>({id:i.id,qty:Number(i.qty)}));
-    if(trackedItems.length){
-      try{
-        await sb.rpc('reserve_product_stock',{p_items:trackedItems});
-      }catch(e){
-        toast('⚠️ One or more items are out of stock. Please review your bag and try again.');
-        loading(false);
-        return;
-      }
-    }
+    const address=delCh==='yes'?(document.getElementById('cka').value||'Not provided'):'Pickup';
     const tot=basket.reduce((a,i)=>a+i.price*i.qty,0);
-    const orderId='ORD-'+Date.now();
-    await sb.post('orders',{
-      id:orderId,
-      store_id:storeId,
-      customer:n,phone:ph,
-      address:delCh==='yes'?(document.getElementById('cka').value||'Not provided'):'Pickup',
-      items:basket.map(i=>({id:i.id,name:i.name,price:i.price,qty:i.qty})),
-      total:tot,status:'new'
+    const orderId='ORD-'+Date.now()+'-'+crypto.randomUUID().replace(/-/g,'').slice(0,10);
+
+    // Create the order and reserve stock in one server-side transaction.
+    // Product names, prices, store ownership, and stock are verified in the RPC.
+    await sb.rpc('create_order_with_stock',{
+      p_order_id:orderId,
+      p_store_id:storeId,
+      p_customer:n,
+      p_phone:ph,
+      p_address:address,
+      p_items:basket.map(i=>({id:i.id,qty:Number(i.qty)})),
+      p_total:tot
     });
 
     if(selectedPM==='mpesa_stk'){
-      hide('ckOv');
+      basket=[];updBasket();hide('ckOv');
       await startMpesaWait(orderId, ph);
       loading(false);
       return;
     }
 
-    const items=basket.map(i=>`${i.name} x${i.qty}`).join(', ');
-    window.open(`https://wa.me/${currentStore.wa.replace(/^0/,'254')}?text=${encodeURIComponent(`🛍️ *New Order — ${currentStore.name}*\n\n👤 ${n}\n📞 ${ph}\n📦 ${items}\n💰 KSh ${tot.toLocaleString()}\n📍 ${delCh==='yes'?(document.getElementById('cka').value||'Not provided'):'Pickup'}\n🔖 ${orderId}`)}`,'_blank');
+    const items=basket.map(i=>i.name+' x'+i.qty).join(', ');
+    if(currentStore.wa){
+      const waText='🛍️ *New Order — '+currentStore.name+'*\n\n👤 '+n+'\n📞 '+ph+'\n📦 '+items+'\n💰 KSh '+tot.toLocaleString()+'\n📍 '+address+'\n🔖 '+orderId;
+      window.open('https://wa.me/'+currentStore.wa.replace(/^0/,'254')+'?text='+encodeURIComponent(waText),'_blank');
+    }
     basket=[];updBasket();hide('ckOv');
     toast('✅ Order placed successfully!');
     setTimeout(()=>{buildStars();show('ratingOv');},1500);
-  }catch(e){toast('Error placing order. Try again.');}
+  }catch(e){
+    console.error('Checkout failed',e);
+    let msg=e&&e.message?e.message:'Please try again.';
+    try{const parsed=JSON.parse(msg);msg=parsed.message||parsed.error||parsed.details||msg;}catch(_){ }
+    toast('Could not place order: '+msg);
+  }
   loading(false);
 }
-
 async function startMpesaWait(orderId, phone){
   show('mpesaWaitOv');
   document.getElementById('mpwSpinner').style.display='block';
@@ -1738,7 +1736,7 @@ function copyLink(){navigator.clipboard.writeText(`${location.origin}${location.
 
 // ── PRODUCTS ──
 function openAddProd(){clearPF();document.getElementById('addPT').textContent='Add Product';show('addProdOv');}
-function clearPF(){['pn','pc','pd','pp','epid'].forEach(id=>document.getElementById(id).value='');document.getElementById('ps').value='In Stock';const i=document.getElementById('pprev');i.src='';i.style.display='none';}
+function clearPF(){['pn','pc','pd','pp','epid'].forEach(id=>document.getElementById(id).value='');document.getElementById('ps').value='0';const i=document.getElementById('pprev');i.src='';i.style.display='none';}
 
 async function saveProd(){
   const n=document.getElementById('pn').value.trim(),p=parseFloat(document.getElementById('pp').value);
