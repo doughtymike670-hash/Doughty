@@ -13,6 +13,20 @@ function decrypt(b64, keyHex) {
   return Buffer.concat([decipher.update(enc), decipher.final()]).toString('utf8');
 }
 function daraja(env) { return env === 'production' ? 'https://api.safaricom.co.ke' : 'https://sandbox.safaricom.co.ke'; }
+function makeMpesaReference(orderId) {
+  const raw = String(orderId || '').replace(/[^A-Za-z0-9]/g, '');
+  return ('D' + raw).slice(-20);
+}
+function makeDarajaTimestamp() {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Africa/Nairobi',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hourCycle: 'h23'
+  }).formatToParts(new Date());
+  const get = (type) => parts.find(p => p.type === type).value;
+  return get('year') + get('month') + get('day') + get('hour') + get('minute') + get('second');
+}
 function normalizePhone(value) {
   let p=String(value||'').replace(/[^0-9+]/g,'').replace(/^\+/,'');
   if(p.startsWith('0')) p='254'+p.slice(1);
@@ -53,7 +67,7 @@ module.exports = async (req, res) => {
     const base=daraja(store.mpesa_env);
     const authRes=await fetch(base+'/oauth/v1/generate?grant_type=client_credentials',{headers:{Authorization:'Basic '+Buffer.from(consumerKey+':'+consumerSecret).toString('base64')}});
     if(!authRes.ok) throw new Error('Could not authenticate with Safaricom — check this store's Daraja credentials.');
-    const auth=await authRes.json(); const timestamp=new Date().toISOString().replace(/[^0-9]/g,'').slice(0,14);
+    const auth=await authRes.json(); const timestamp=makeDarajaTimestamp();
     const password=Buffer.from(store.mpesa_shortcode+passkey+timestamp).toString('base64');
     const stkRes=await fetch(base+'/mpesa/stkpush/v1/processrequest',{method:'POST',headers:{Authorization:'Bearer '+auth.access_token,'Content-Type':'application/json'},body:JSON.stringify({BusinessShortCode:store.mpesa_shortcode,Password:password,Timestamp:timestamp,TransactionType:'CustomerPayBillOnline',Amount:amount,PartyA:cleanPhone,PartyB:store.mpesa_shortcode,PhoneNumber:cleanPhone,CallBackURL:CALLBACK_URL,AccountReference:makeMpesaReference(order_id),TransactionDesc:'Doughty order'})});
     const stkData=await stkRes.json();
