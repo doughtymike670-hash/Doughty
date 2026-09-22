@@ -913,6 +913,7 @@ tr:hover td{background:#FDFCFC;}
 // ── SUPABASE CONFIG ──
 const SUPABASE_URL = 'https://qnhkbthgnrrgtcpdzjfm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuaGtidGhnbnJyZ3RjcGR6amZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMTA3NzMsImV4cCI6MjA5NzU4Njc3M30.4B30FcB9M4gtuP3cfFNCsrsBo3sHcYp-sea49FRZxWE';
+const STORE_SAFE_SELECT = 'id,name,username,code,wa,status,applied,description,delivery_on,pay_timing,deposit_pct,paybill,account,send_money,created_at,owner_auth_id,mpesa_shortcode,mpesa_env,mpesa_enabled';
 
 // Supabase client helper
 let userSession=null; // holds the current shop-owner or super-admin's real Supabase Auth access token
@@ -1047,7 +1048,7 @@ async function ownerLogin(){
       err.style.display='block';err.textContent='Incorrect username or password.';loading(false);return;
     }
     userSession=d.access_token;
-    const stores=await sb.get('stores',`username=eq.${u}&select=*`);
+    const stores=await sb.get('stores',`username=eq.${u}&select=${STORE_SAFE_SELECT}`);
     if(!stores.length){
       userSession=null;
       err.style.display='block';err.textContent='No store found for this login.';loading(false);return;
@@ -1494,7 +1495,7 @@ async function loadDash(){
 }
 
 async function getOwnerStore(){
-  const stores=await sb.get('stores',`id=eq.${owner.id}&select=*`);
+  const stores=await sb.get('stores',`id=eq.${owner.id}&select=${STORE_SAFE_SELECT}`);
   return stores[0]||owner;
 }
 
@@ -1727,7 +1728,7 @@ async function saveSet(){
 
 async function previewStore(){
   loading(true);
-  const stores=await sb.get('stores',`id=eq.${owner.id}&select=*`);
+  const stores=await sb.get('stores',`id=eq.${owner.id}&select=${STORE_SAFE_SELECT}`);
   currentStore=stores[0];storeId=owner.id;
   await loadSF(currentStore);
   loading(false);
@@ -1844,7 +1845,7 @@ async function uploadToCloudinary(file){
 async function loadSA(){
   loading(true);
   try{
-    const stores=await sb.get('stores',`select=*,products(count),orders(count)`);
+    const stores=await sb.get('stores',`select=${STORE_SAFE_SELECT},products(count),orders(count)`);
     const allOrders=await sb.get('orders',`select=*&order=created_at.desc`);
     const allProdsCount=await sb.get('products',`select=count`);
     renSAStats(stores,allOrders);
@@ -2089,7 +2090,7 @@ function renSAAlerts(stores){
 
 async function showEmerg(){
   loading(true);
-  const stores=await sb.get('stores',`status=eq.active&select=*`);
+  const stores=await sb.get('stores',`status=eq.active&select=${STORE_SAFE_SELECT}`);
   loading(false);
   document.getElementById('emergList').innerHTML=stores.length
     ?stores.map(s=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:#F9FAFB;border-radius:8px;border:1px solid #E5E7EB;margin-bottom:6px;"><div><strong style="font-size:.84rem;">${s.name}</strong><div style="font-size:.72rem;color:#6B7280;">@${s.username}</div></div><button class="suspbtn" onclick="togStore('${s.id}',true,'${s.name}');hide('emergOv');">⏸ Suspend</button></div>`).join('')
