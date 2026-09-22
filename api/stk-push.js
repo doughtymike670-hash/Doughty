@@ -55,7 +55,7 @@ module.exports = async (req, res) => {
     if(!authRes.ok) throw new Error('Could not authenticate with Safaricom — check this store's Daraja credentials.');
     const auth=await authRes.json(); const timestamp=new Date().toISOString().replace(/[^0-9]/g,'').slice(0,14);
     const password=Buffer.from(store.mpesa_shortcode+passkey+timestamp).toString('base64');
-    const stkRes=await fetch(base+'/mpesa/stkpush/v1/processrequest',{method:'POST',headers:{Authorization:'Bearer '+auth.access_token,'Content-Type':'application/json'},body:JSON.stringify({BusinessShortCode:store.mpesa_shortcode,Password:password,Timestamp:timestamp,TransactionType:'CustomerPayBillOnline',Amount:amount,PartyA:cleanPhone,PartyB:store.mpesa_shortcode,PhoneNumber:cleanPhone,CallBackURL:CALLBACK_URL,AccountReference:order_id,TransactionDesc:'Order '+order_id})});
+    const stkRes=await fetch(base+'/mpesa/stkpush/v1/processrequest',{method:'POST',headers:{Authorization:'Bearer '+auth.access_token,'Content-Type':'application/json'},body:JSON.stringify({BusinessShortCode:store.mpesa_shortcode,Password:password,Timestamp:timestamp,TransactionType:'CustomerPayBillOnline',Amount:amount,PartyA:cleanPhone,PartyB:store.mpesa_shortcode,PhoneNumber:cleanPhone,CallBackURL:CALLBACK_URL,AccountReference:makeMpesaReference(order_id),TransactionDesc:'Doughty order'})});
     const stkData=await stkRes.json();
     if(stkData.ResponseCode!=='0') { await releaseOrder(SUPABASE_URL,SERVICE_KEY,order_id); return res.status(400).json({error:stkData.errorMessage||stkData.ResponseDescription||'Could not start payment.'}); }
     paymentAccepted=true;
