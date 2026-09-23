@@ -1374,15 +1374,18 @@ async function startMpesaWait(orderId, phone){
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({order_id:orderId, username:currentStore.username, phone})
     });
-    const d=await r.json();
+    const raw=await r.text();
+    let d={};
+    try{ d=raw?JSON.parse(raw):{}; }catch(_){}
     if(!r.ok||!d.success){
       await sb.rpc('cancel_order',{p_order_id:orderId,p_phone:phone}).catch(()=>{});
-      mpesaWaitResult(false, d.error||'Could not start the M-Pesa prompt. Your stock has been released; please try again.');
+      const detail=d.error||`Payment service returned HTTP ${r.status}.`;
+      mpesaWaitResult(false, detail+' Your stock has been released; please try again.');
       return;
     }
   }catch(e){
     await sb.rpc('cancel_order',{p_order_id:orderId,p_phone:phone}).catch(()=>{});
-    mpesaWaitResult(false, 'Connection error starting payment. Your stock has been released; please try again.');
+    mpesaWaitResult(false, 'Could not reach the payment service. Check your internet connection and try again.');
     return;
   }
 
