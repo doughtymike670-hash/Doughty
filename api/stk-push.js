@@ -39,8 +39,16 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({error:'Method not allowed'});
   const {order_id, username, phone} = req.body || {};
   if (typeof order_id !== 'string' || typeof username !== 'string' || typeof phone !== 'string' || !order_id || !username || !phone) return res.status(400).json({error:'Missing required fields.'});
-  const SUPABASE_URL=process.env.SUPABASE_URL, SERVICE_KEY=process.env.SUPABASE_SERVICE_ROLE_KEY, ENC_KEY=process.env.ENCRYPTION_KEY, CALLBACK_URL=process.env.MPESA_CALLBACK_URL;
-  if(!SUPABASE_URL || !SERVICE_KEY || !ENC_KEY || !CALLBACK_URL) return res.status(500).json({error:'M-Pesa server configuration is incomplete.'});
+  const SUPABASE_URL=process.env.SUPABASE_URL, SERVICE_KEY=process.env.SUPABASE_SERVICE_ROLE_KEY, ENC_KEY=process.env.ENCRYPTION_KEY;
+  const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();
+  const host = req.headers.host;
+  const CALLBACK_URL=process.env.MPESA_CALLBACK_URL || (host ? `${proto}://${host}/api/mpesa-callback` : '');
+  const missing=[];
+  if(!SUPABASE_URL) missing.push('SUPABASE_URL');
+  if(!SERVICE_KEY) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+  if(!ENC_KEY) missing.push('ENCRYPTION_KEY');
+  if(!CALLBACK_URL) missing.push('MPESA_CALLBACK_URL');
+  if(missing.length) return res.status(500).json({error:'M-Pesa server configuration is incomplete: '+missing.join(', ')});
   const sHeaders={apikey:SERVICE_KEY,Authorization:'Bearer '+SERVICE_KEY};
   let paymentAccepted=false;
   try {
@@ -70,8 +78,9 @@ module.exports = async (req, res) => {
     const auth=await authRes.json(); const timestamp=makeDarajaTimestamp();
     const password=Buffer.from(store.mpesa_shortcode+passkey+timestamp).toString('base64');
     const stkRes=await fetch(base+'/mpesa/stkpush/v1/processrequest',{method:'POST',headers:{Authorization:'Bearer '+auth.access_token,'Content-Type':'application/json'},body:JSON.stringify({BusinessShortCode:store.mpesa_shortcode,Password:password,Timestamp:timestamp,TransactionType:'CustomerPayBillOnline',Amount:amount,PartyA:cleanPhone,PartyB:store.mpesa_shortcode,PhoneNumber:cleanPhone,CallBackURL:CALLBACK_URL,AccountReference:makeMpesaReference(order_id),TransactionDesc:'Doughty order'})});
-    const stkData=await stkRes.json();
-    if(stkData.ResponseCode!=='0') { await releaseOrder(SUPABASE_URL,SERVICE_KEY,order_id); return res.status(400).json({error:stkData.errorMessage||stkData.ResponseDescription||'Could not start payment.'}); }
+    const stkText=await stkRes.text();
+    let stkData={}; try { stkData=stkText ? JSON.parse(stkText) : {}; } catch(_) {}
+    if(!stkRes.ok || stkData.ResponseCode!=='0') { await releaseOrder(SUPABASE_URL,SERVICE_KEY,order_id); return res.status(400).json({error:stkData.errorMessage||stkData.ResponseDescription||stkData.error||stkText||('Safaricom returned HTTP '+stkRes.status)}); }
     paymentAccepted=true;
     const payRes=await fetch(SUPABASE_URL+'/rest/v1/payments',{method:'POST',headers:{...sHeaders,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({order_id,checkout_request_id:stkData.CheckoutRequestID,merchant_request_id:stkData.MerchantRequestID,status:'pending',amount_paid:amount})});
     if(!payRes.ok) return res.status(500).json({error:'The payment prompt started, but the payment record could not be saved. Please do not retry yet.'});
