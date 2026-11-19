@@ -567,7 +567,7 @@ tr:hover td{background:#FDFCFC;}
         <p class="hero-sub">BEAUTY &amp; COSMETICS PLATFORM</p>
         <div class="hero-divider">&#9670;</div>
         <p class="hero-tag">Your one-stop destination for premium beauty, trusted brands &amp; timeless glow.</p>
-        <button class="hero-btn gold" onclick="show('custOv')">&#128717; Shop Now</button>
+        <button class="hero-btn gold" onclick="openCustomerDirectory()">&#128717; Shop Now</button>
         <button class="hero-btn" onclick="show('loginOv')">&#128100; Shop Owner Login</button>
         <button class="hero-btn" onclick="show('signupOv')">&#127978; Register My Store</button>
         <button class="hero-btn" onclick="show('saOv')">&#128274; Admin Access</button>
@@ -882,7 +882,7 @@ tr:hover td{background:#FDFCFC;}
 </div>
 
 <!-- OVERLAYS -->
-<div class="ov" id="custOv"><div class="modal"><button class="mx" onclick="hide('custOv')">✕</button><h2>Find a Store</h2><p class="msub">Enter the exact shop username or paste the shop link to start shopping</p><div class="fg"><label>Exact Shop Username or Link</label><input type="text" id="custIn" placeholder="e.g. @Beauty"/></div><button class="mbtn" onclick="custEnter()">Find Store →</button><p id="custErr" class="err">Store not found. Check and try again.</p><div style="margin-top:14px;padding-top:12px;border-top:1px solid #F3F4F6;font-size:.73rem;color:var(--gray);text-align:center;">💡 Shop owners share their link on TikTok, Instagram, YouTube & WhatsApp</div></div></div>
+<div class="ov" id="custOv"><div class="modal" style="max-width:520px;width:calc(100% - 32px);max-height:85vh;overflow-y:auto;"><button class="mx" onclick="hide('custOv')">✕</button><h2>Choose a Shop</h2><p class="msub">Browse our registered shops and select where you would like to shop.</p><div id="customerShopList" style="display:grid;gap:10px;margin-top:18px;"><p style="color:var(--gray);text-align:center;padding:22px;">Loading available shops…</p></div><div style="margin-top:16px;padding-top:12px;border-top:1px solid #F3F4F6;font-size:.73rem;color:var(--gray);text-align:center;">Only approved and active shops are displayed.</div></div></div>
 
 <div class="ov" id="loginOv"><div class="modal modal-premium"><button class="mx" onclick="hide('loginOv')">✕</button><div class="mp-brand"><svg viewBox="0 0 512 512"><use href="#dico"/></svg><div class="mp-title">Doughty</div><div class="mp-tag">Beauty & Cosmetics Platform</div></div><h2>Shop Owner Login</h2><p class="msub">Access your store dashboard</p><div class="fg"><label>Username</label><input type="text" id="logu"/></div><div class="fg"><label>Password</label><input type="password" id="logp"/></div><p id="logerr" class="err">Incorrect credentials.</p><button class="mbtn" onclick="ownerLogin()">Login →</button><div class="swlnk">No account? <span class="inline-link" onclick="sw2('loginOv','signupOv')">Register here</span></div></div></div>
 
@@ -953,7 +953,7 @@ const sb = {
 
 // ── STATE ──
 let owner=null, storeId=null, basket=[], lang='en', selR=0, chatOpen=false, delCh='yes', wishlist=new Set(), selectedPM='cod';
-let currentStore=null;
+let currentStore=null, customerShops=[];
 const AWA='0732916813';
 let saSession=null;
 
@@ -1109,49 +1109,69 @@ async function saLogin(){
   }
 }
 
-// ── CUSTOMER ENTER ──
-function getExactCustomerShopUsername(input){
-  const raw=(input||'').trim();
-  if(!raw)return '';
-  // Accept a shared Doughty shop URL, but preserve the exact username spelling.
+// ── CUSTOMER SHOP DIRECTORY ──
+async function openCustomerDirectory(){
+  show('custOv');
+  const list=document.getElementById('customerShopList');
+  list.textContent='';
+  const loadingText=document.createElement('p');
+  loadingText.textContent='Loading available shops…';
+  loadingText.style.cssText='color:var(--gray);text-align:center;padding:22px;';
+  list.appendChild(loadingText);
   try{
-    const url=new URL(raw);
-    const fromQuery=url.searchParams.get('store')||url.searchParams.get('s');
-    if(fromQuery)return fromQuery.trim();
-    const pathPart=decodeURIComponent(url.pathname.split('/').filter(Boolean).pop()||'');
-    if(pathPart.startsWith('@'))return pathPart;
-  }catch(e){}
-  return raw;
-}
-
-async function custEnter(){
-  const raw=document.getElementById('custIn').value.trim();
-  const username=getExactCustomerShopUsername(raw);
-  const err=document.getElementById('custErr');
-  err.style.display='none';
-  loading(true);
-  try{
-    // Customer entry is by exact shop username only. Do not fall back to a
-    // case-insensitive display-name search (e.g. "beauty" must not match "@Beauty").
-    const stores=await sb.get('stores_public',`username=eq.${encodeURIComponent(username)}&status=eq.active&select=*`);
-    if(!stores.length){
-      err.textContent='Shop not found. Enter the exact shop username, including @ and capital letters (for example, @Beauty), or paste the shop link.';
-      err.style.display='block';
-      loading(false);
+    customerShops=await sb.get('stores_public','status=eq.active&select=id,name,username,description&order=name.asc');
+    list.textContent='';
+    if(!customerShops.length){
+      const empty=document.createElement('p');
+      empty.textContent='There are no active shops available yet. Please check back soon.';
+      empty.style.cssText='color:var(--gray);text-align:center;padding:22px;';
+      list.appendChild(empty);
       return;
     }
-    const s=stores[0];
-    storeId=s.id;currentStore=s;
-    hide('custOv');
-    document.getElementById('lkName').textContent=s.name;
-    document.getElementById('lkDesc').textContent=s.description||'Premium beauty products';
-    document.getElementById('lkIn').value='';
-    showView('storeLock');
+    customerShops.forEach(shop=>{
+      const card=document.createElement('button');
+      card.type='button';
+      card.style.cssText='display:block;width:100%;text-align:left;padding:15px 16px;border:1px solid #E8E8E8;border-radius:12px;background:#fff;cursor:pointer;font:inherit;transition:border-color .2s,box-shadow .2s;';
+      card.addEventListener('mouseenter',()=>{card.style.borderColor='var(--rose)';card.style.boxShadow='0 4px 14px rgba(0,0,0,.06)';});
+      card.addEventListener('mouseleave',()=>{card.style.borderColor='#E8E8E8';card.style.boxShadow='none';});
+      const name=document.createElement('div');
+      name.textContent=shop.name||'Unnamed Shop';
+      name.style.cssText='font-weight:700;color:#252525;font-size:.98rem;';
+      const username=document.createElement('div');
+      username.textContent=shop.username||'';
+      username.style.cssText='font-size:.78rem;color:var(--rose);margin-top:3px;';
+      card.append(name,username);
+      if(shop.description){
+        const description=document.createElement('div');
+        description.textContent=shop.description;
+        description.style.cssText='font-size:.78rem;color:#777;margin-top:7px;line-height:1.45;';
+        card.appendChild(description);
+      }
+      const action=document.createElement('div');
+      action.textContent='Select shop  →';
+      action.style.cssText='font-size:.76rem;font-weight:600;color:var(--rose);margin-top:10px;';
+      card.appendChild(action);
+      card.addEventListener('click',()=>chooseCustomerShop(shop.id));
+      list.appendChild(card);
+    });
   }catch(e){
-    err.textContent='Connection error. Try again.';
-    err.style.display='block';
+    list.textContent='';
+    const message=document.createElement('p');
+    message.textContent='We could not load the shop directory. Please close this window and try again.';
+    message.style.cssText='color:var(--gray);text-align:center;padding:22px;';
+    list.appendChild(message);
   }
-  loading(false);
+}
+
+function chooseCustomerShop(id){
+  const s=customerShops.find(shop=>shop.id===id);
+  if(!s)return;
+  storeId=s.id;currentStore=s;
+  hide('custOv');
+  document.getElementById('lkName').textContent=s.name;
+  document.getElementById('lkDesc').textContent=s.description||'Premium beauty products';
+  document.getElementById('lkIn').value='';
+  showView('storeLock');
 }
 
 // ── LOCK ──
