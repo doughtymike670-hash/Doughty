@@ -882,7 +882,7 @@ tr:hover td{background:#FDFCFC;}
 </div>
 
 <!-- OVERLAYS -->
-<div class="ov" id="custOv"><div class="modal"><button class="mx" onclick="hide('custOv')">✕</button><h2>Find a Store</h2><p class="msub">Enter store name or paste store link to start shopping</p><div class="fg"><label>Store Name or Link</label><input type="text" id="custIn" placeholder="e.g. Bella Beauty"/></div><button class="mbtn" onclick="custEnter()">Find Store →</button><p id="custErr" class="err">Store not found. Check and try again.</p><div style="margin-top:14px;padding-top:12px;border-top:1px solid #F3F4F6;font-size:.73rem;color:var(--gray);text-align:center;">💡 Shop owners share their link on TikTok, Instagram, YouTube & WhatsApp</div></div></div>
+<div class="ov" id="custOv"><div class="modal"><button class="mx" onclick="hide('custOv')">✕</button><h2>Find a Store</h2><p class="msub">Enter the exact shop username or paste the shop link to start shopping</p><div class="fg"><label>Exact Shop Username or Link</label><input type="text" id="custIn" placeholder="e.g. @Beauty"/></div><button class="mbtn" onclick="custEnter()">Find Store →</button><p id="custErr" class="err">Store not found. Check and try again.</p><div style="margin-top:14px;padding-top:12px;border-top:1px solid #F3F4F6;font-size:.73rem;color:var(--gray);text-align:center;">💡 Shop owners share their link on TikTok, Instagram, YouTube & WhatsApp</div></div></div>
 
 <div class="ov" id="loginOv"><div class="modal modal-premium"><button class="mx" onclick="hide('loginOv')">✕</button><div class="mp-brand"><svg viewBox="0 0 512 512"><use href="#dico"/></svg><div class="mp-title">Doughty</div><div class="mp-tag">Beauty & Cosmetics Platform</div></div><h2>Shop Owner Login</h2><p class="msub">Access your store dashboard</p><div class="fg"><label>Username</label><input type="text" id="logu"/></div><div class="fg"><label>Password</label><input type="password" id="logp"/></div><p id="logerr" class="err">Incorrect credentials.</p><button class="mbtn" onclick="ownerLogin()">Login →</button><div class="swlnk">No account? <span class="inline-link" onclick="sw2('loginOv','signupOv')">Register here</span></div></div></div>
 
@@ -1110,24 +1110,36 @@ async function saLogin(){
 }
 
 // ── CUSTOMER ENTER ──
+function getExactCustomerShopUsername(input){
+  const raw=(input||'').trim();
+  if(!raw)return '';
+  // Accept a shared Doughty shop URL, but preserve the exact username spelling.
+  try{
+    const url=new URL(raw);
+    const fromQuery=url.searchParams.get('store')||url.searchParams.get('s');
+    if(fromQuery)return fromQuery.trim();
+    const pathPart=decodeURIComponent(url.pathname.split('/').filter(Boolean).pop()||'');
+    if(pathPart.startsWith('@'))return pathPart;
+  }catch(e){}
+  return raw;
+}
+
 async function custEnter(){
   const raw=document.getElementById('custIn').value.trim();
+  const username=getExactCustomerShopUsername(raw);
   const err=document.getElementById('custErr');
   err.style.display='none';
   loading(true);
   try{
-    let stores=[];
-    if(raw.includes('/')){
-      const u=raw.split('/').pop().toLowerCase();
-      stores=await sb.get('stores_public',`username=eq.${u}&status=eq.active&select=*`);
-    }
+    // Customer entry is by exact shop username only. Do not fall back to a
+    // case-insensitive display-name search (e.g. "beauty" must not match "@Beauty").
+    const stores=await sb.get('stores_public',`username=eq.${encodeURIComponent(username)}&status=eq.active&select=*`);
     if(!stores.length){
-      stores=await sb.get('stores_public',`username=eq.${raw}&status=eq.active&select=*`);
+      err.textContent='Shop not found. Enter the exact shop username, including @ and capital letters (for example, @Beauty), or paste the shop link.';
+      err.style.display='block';
+      loading(false);
+      return;
     }
-    if(!stores.length){
-      stores=await sb.get('stores_public',`name=ilike.${raw}&status=eq.active&select=*`);
-    }
-    if(!stores.length){err.style.display='block';loading(false);return;}
     const s=stores[0];
     storeId=s.id;currentStore=s;
     hide('custOv');
@@ -1135,7 +1147,10 @@ async function custEnter(){
     document.getElementById('lkDesc').textContent=s.description||'Premium beauty products';
     document.getElementById('lkIn').value='';
     showView('storeLock');
-  }catch(e){err.style.display='block';err.textContent='Connection error. Try again.';}
+  }catch(e){
+    err.textContent='Connection error. Try again.';
+    err.style.display='block';
+  }
   loading(false);
 }
 
@@ -2130,7 +2145,7 @@ async function checkURL(){
   if(!u)return;
   loading(true);
   try{
-    const stores=await sb.get('stores_public',`username=eq.${u}&status=eq.active&select=*`);
+    const stores=await sb.get('stores_public',`username=eq.${encodeURIComponent(u)}&status=eq.active&select=*`);
     if(stores.length){
       const s=stores[0];storeId=s.id;currentStore=s;
       document.getElementById('lkName').textContent=s.name;
