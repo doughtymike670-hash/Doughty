@@ -1077,14 +1077,36 @@ async function saLogin(){
       body:JSON.stringify({email:u,password:p})
     });
     const d=await r.json();
-    if(r.ok&&d.access_token){
-      saSession=d.access_token;
-      err.style.display='none';hide('saOv');loadSA();showView('superAdmin');
-    }else{
-      err.textContent='Incorrect email or password.';err.style.display='block';
+    if(!r.ok||!d.access_token||!d.user||!d.user.id){
+      saSession=null;
+      err.textContent='Incorrect email or password.';
+      err.style.display='block';
+      return;
     }
-  }catch(e){err.textContent='Connection error — try again.';err.style.display='block';}
-  loading(false);
+
+    // Never trust successful authentication alone: verify the account's admin membership.
+    // Clear any previous owner session so this check uses the newly authenticated admin token.
+    userSession=null;
+    saSession=d.access_token;
+    const memberships=await sb.get('admins',`user_id=eq.${encodeURIComponent(d.user.id)}&select=user_id&limit=1`);
+    if(!memberships.length){
+      saSession=null;
+      err.textContent='This account is not authorized as a Super Admin.';
+      err.style.display='block';
+      return;
+    }
+
+    err.style.display='none';
+    hide('saOv');
+    showView('superAdmin');
+    await loadSA();
+  }catch(e){
+    saSession=null;
+    err.textContent='Could not verify Super Admin access. Please try again.';
+    err.style.display='block';
+  }finally{
+    loading(false);
+  }
 }
 
 // ── CUSTOMER ENTER ──
